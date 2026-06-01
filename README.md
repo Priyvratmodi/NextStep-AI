@@ -63,7 +63,6 @@ User Input → Decision Tree Classification → AI Recommendation Engine → Car
 ![Home Screen](screenshots/HomeScreen.png)
 ![Dashboard](screenshots/Dashboard.png)
 ![Career Recommendation](screenshots/Careeroption.png)
-![Schedule Generation](screenshots/schedule.png)
 
 ---
 
