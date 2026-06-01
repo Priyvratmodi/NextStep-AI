@@ -54,15 +54,15 @@ User Input → Decision Tree Classification → AI Recommendation Engine → Car
 
 ## 🏗️ System Architecture
 
-![Architecture](docs/architecture.png)
+![Architecture](docs/Architecture.png)
 
 ---
 
 ## 📸 Screenshots
 
-![Home Screen](screenshots/home.png)
-![Dashboard](screenshots/dashboard.png)
-![Career Recommendation](screenshots/recommendation.png)
+![Home Screen](screenshots/HomeScreen.png)
+![Dashboard](screenshots/Dashboard.png)
+![Career Recommendation](screenshots/Careeroption.png)
 ![Schedule Generation](screenshots/schedule.png)
 
 ---
