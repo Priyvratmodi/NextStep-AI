@@ -146,7 +146,7 @@ flutter run
 
 ## 📄 Project Report
 
-👉 [View Full Report](docs/project_report.pdf)
+👉 [View Full Report](docs/Project_Report.pdf)
 
 ---
 
