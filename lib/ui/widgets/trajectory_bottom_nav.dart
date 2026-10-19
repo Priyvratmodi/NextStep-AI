@@ -15,14 +15,16 @@ class TrajectoryBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-      height: 76,
-      decoration: BoxDecoration(
-        color: cs.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.8)),
-        boxShadow: [
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 580),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+        height: 76,
+        decoration: BoxDecoration(
+          color: cs.surface.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.8)),
+          boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.10),
             blurRadius: 18,
@@ -64,6 +66,7 @@ class TrajectoryBottomNav extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

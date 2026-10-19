@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:career_path_finder/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthPage extends ConsumerStatefulWidget {
   final bool initialIsLogin;
@@ -16,6 +17,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   final _passwordController = TextEditingController();
   late bool _isLogin;
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -36,7 +38,22 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter both email and password.')),
+        const SnackBar(content: Text('Please enter both email and password.')),
+      );
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address.')),
+      );
+      return;
+    }
+
+    if (!_isLogin && password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 6 characters.')),
       );
       return;
     }
@@ -50,6 +67,18 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       } else {
         await authService.signUp(email, password);
       }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isLogin ? 'Signed in successfully.' : 'Account created successfully.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,6 +90,77 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     }
 
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final resetEmailController = TextEditingController(text: _emailController.text.trim());
+    final cs = Theme.of(context).colorScheme;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainerLowest,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your email address and we will send you a password reset link.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: resetEmailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: 'user@example.com',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final email = resetEmailController.text.trim();
+              if (email.isEmpty) return;
+              final messenger = ScaffoldMessenger.of(context);
+              final nav = Navigator.of(ctx);
+              try {
+                await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                if (ctx.mounted) {
+                  nav.pop();
+                }
+                if (mounted) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Password reset link sent to your email.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString().replaceFirst('Exception: ', '')),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Send Link'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -83,7 +183,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                   ),
                   const Spacer(),
                   Text(
-                    'TRAJECTORY',
+                    'NEXTSTEP AI',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
@@ -100,160 +200,173 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: cs.outlineVariant),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _isLogin ? 'Welcome back' : 'Create account',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            color: cs.onSurface,
-                            letterSpacing: -1.0,
-                            height: 1.1,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.8)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _isLogin
-                              ? 'Sign in to continue your career plan.'
-                              : 'Create your account and start your assessment.',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: cs.onSurface.withValues(alpha: 0.5),
-                            height: 1.5,
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _isLogin ? 'Welcome back' : 'Create account',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: cs.onSurface,
+                              letterSpacing: -0.8,
+                              height: 1.1,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 48),
+                          const SizedBox(height: 12),
+                          Text(
+                            _isLogin
+                                ? 'Sign in to access your saved career path & schedule.'
+                                : 'Join NextStep AI to discover tailored career roadmaps.',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: cs.onSurface.withValues(alpha: 0.6),
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 36),
 
-                        // Email Field
-                        _buildLabel(cs, 'EMAIL ADDRESS'),
-                        const SizedBox(height: 12),
-                        _buildTextField(
-                          controller: _emailController,
-                          hint: 'e.g. user@example.com',
-                          icon: Icons.email_outlined,
-                          cs: cs,
-                        ),
+                          // Email Field
+                          _buildLabel(cs, 'EMAIL ADDRESS'),
+                          const SizedBox(height: 10),
+                          _buildTextField(
+                            controller: _emailController,
+                            hint: 'e.g. user@example.com',
+                            icon: Icons.email_outlined,
+                            cs: cs,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
-                        // Password Field
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildLabel(cs, 'PASSWORD'),
-                            if (_isLogin)
-                              GestureDetector(
-                                onTap: () {},
-                                child: Text(
-                                  'Forgot password?',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w900,
-                                    color: cs.primary,
+                          // Password Field
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildLabel(cs, 'PASSWORD'),
+                              if (_isLogin)
+                                GestureDetector(
+                                  onTap: _showForgotPasswordDialog,
+                                  child: Text(
+                                    'Forgot password?',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: cs.primary,
+                                    ),
                                   ),
                                 ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _buildTextField(
+                            controller: _passwordController,
+                            hint: _isLogin ? 'Enter your password' : 'Min. 6 characters',
+                            icon: Icons.lock_outline,
+                            obscure: _obscurePassword,
+                            cs: cs,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                                color: cs.onSurfaceVariant,
                               ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _buildTextField(
-                          controller: _passwordController,
-                          hint: 'Password',
-                          icon: Icons.lock_outline,
-                          obscure: true,
-                          cs: cs,
-                        ),
-
-                        const SizedBox(height: 48),
-
-                        // Submit Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 64,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: cs.primary,
-                              foregroundColor: cs.onPrimary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
+                              onPressed: () {
+                                setState(() => _obscurePassword = !_obscurePassword);
+                              },
                             ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _isLogin ? 'Sign in' : 'Sign up',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
+                          ),
+
+                          const SizedBox(height: 36),
+
+                          // Submit Button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: FilledButton(
+                              onPressed: _isLoading ? null : _submit,
+                              style: FilledButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          _isLogin ? 'Sign In' : 'Create Account',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(
-                                        Icons.arrow_forward_rounded,
-                                        size: 20,
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Toggle Auth Mode
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextButton(
-                            onPressed: () =>
-                                setState(() => _isLogin = !_isLogin),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              _isLogin
-                                  ? 'Need an account? Create one'
-                                  : 'Already have an account? Sign in',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: cs.onSurface.withValues(alpha: 0.6),
-                              ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
-                        ),
-                      ],
+
+                          const SizedBox(height: 24),
+
+                          // Toggle Auth Mode
+                          SizedBox(
+                            width: double.infinity,
+                            child: TextButton(
+                              onPressed: () =>
+                                  setState(() => _isLogin = !_isLogin),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                _isLogin
+                                    ? "Don't have an account? Sign up"
+                                    : 'Already have an account? Sign in',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -270,9 +383,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       text,
       style: TextStyle(
         fontSize: 11,
-        fontWeight: FontWeight.w900,
-        color: cs.onSurface.withValues(alpha: 0.4),
-        letterSpacing: 1.5,
+        fontWeight: FontWeight.w800,
+        color: cs.onSurface.withValues(alpha: 0.5),
+        letterSpacing: 1.2,
       ),
     );
   }
@@ -282,6 +395,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     required String hint,
     required IconData icon,
     bool obscure = false,
+    Widget? suffixIcon,
+    TextInputType keyboardType = TextInputType.text,
     required ColorScheme cs,
   }) {
     return Container(
@@ -293,22 +408,27 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       child: TextField(
         controller: controller,
         obscureText: obscure,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        keyboardType: keyboardType,
+        style: TextStyle(
+          color: cs.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: cs.onSurface.withValues(alpha: 0.3),
+            color: cs.onSurface.withValues(alpha: 0.35),
             fontWeight: FontWeight.normal,
           ),
           prefixIcon: Icon(
             icon,
-            color: cs.primary.withValues(alpha: 0.5),
+            color: cs.primary.withValues(alpha: 0.7),
             size: 20,
           ),
+          suffixIcon: suffixIcon,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 20,
+            vertical: 16,
           ),
         ),
       ),

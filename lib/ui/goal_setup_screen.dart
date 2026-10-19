@@ -291,41 +291,46 @@ class _GoalSetupScreenState extends State<GoalSetupScreen>
     final blueprint = _blueprintForRole();
 
     return SafeArea(
-      child: Column(
-        children: [
-          _buildTopBar(cs),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              children: [
-                _buildSummaryCard(cs),
-                const SizedBox(height: 24),
-                _buildSalaryCard(),
-                const SizedBox(height: 32),
-                Center(
-                  child: Text(
-                    'THE TRAJECTORY BLUEPRINT',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.3,
-                      color: cs.onSurface.withValues(alpha: 0.5),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Column(
+            children: [
+              _buildTopBar(cs),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  children: [
+                    _buildSummaryCard(cs),
+                    const SizedBox(height: 24),
+                    _buildSalaryCard(),
+                    const SizedBox(height: 32),
+                    Center(
+                      child: Text(
+                        'THE TRAJECTORY BLUEPRINT',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.3,
+                          color: cs.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 32),
+                    for (final entry in blueprint.indexed)
+                      _buildBlueprintStep(
+                        step: entry.$1 + 1,
+                        title: entry.$2.title,
+                        desc: entry.$2.desc,
+                      ),
+                    const SizedBox(height: 160), // Space for bottom sheet
+                  ],
                 ),
-                const SizedBox(height: 32),
-                for (final entry in blueprint.indexed)
-                  _buildBlueprintStep(
-                    step: entry.$1 + 1,
-                    title: entry.$2.title,
-                    desc: entry.$2.desc,
-                  ),
-                const SizedBox(height: 160), // Space for bottom sheet
-              ],
-            ),
+              ),
+              _buildFloatingBottomBar(),
+            ],
           ),
-          _buildFloatingBottomBar(),
-        ],
+        ),
       ),
     );
   }
@@ -336,41 +341,43 @@ class _GoalSetupScreenState extends State<GoalSetupScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: cs.outlineVariant.withValues(alpha: 0.5),
+          Expanded(
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: cs.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(Icons.arrow_back, size: 20, color: cs.primary),
-                ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.58,
-                child: Text(
-                  widget.role.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F4E5F),
+                    child: Icon(Icons.arrow_back, size: 20, color: cs.primary),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.role.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const CircleAvatar(
+          const SizedBox(width: 12),
+          CircleAvatar(
             radius: 16,
-            backgroundColor: Color(0xFF1a2b3c),
-            child: Icon(Icons.person, size: 20, color: Colors.white),
+            backgroundColor: cs.primaryContainer,
+            child: Icon(Icons.person, size: 20, color: cs.onPrimaryContainer),
           ),
         ],
       ),

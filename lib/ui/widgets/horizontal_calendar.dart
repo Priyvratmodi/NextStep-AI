@@ -44,7 +44,7 @@ class HorizontalCalendar extends StatelessWidget {
               margin: const EdgeInsets.only(right: 12),
               width: 65,
               decoration: BoxDecoration(
-                color: isSelected ? cs.primary : Colors.white,
+                color: isSelected ? cs.primary : cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected ? cs.primary : cs.outlineVariant,

@@ -1,11 +1,11 @@
 {
-    "name": "career_path_finder",
-    "short_name": "career_path_finder",
+    "name": "NextStep AI - Career Trajectory Finder",
+    "short_name": "NextStep AI",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1F4E5F",
+    "theme_color": "#1F4E5F",
+    "description": "Discover personalized career trajectories, compare role options, and turn them into daily study roadmaps.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

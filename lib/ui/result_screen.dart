@@ -23,35 +23,40 @@ class _ResultScreenState extends State<ResultScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          children: [
-            const SizedBox(height: 12),
-            _buildTopBar(context),
-            const SizedBox(height: 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 880),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              children: [
+                const SizedBox(height: 12),
+                _buildTopBar(context),
+                const SizedBox(height: 32),
 
-            // Active Schedule Banner (if exists)
-            FutureBuilder<CareerSchedule?>(
-              future: ScheduleStorageService.loadSchedule(),
-              builder: (context, snapshot) {
-                final schedule = snapshot.data;
-                if (schedule == null) return const SizedBox.shrink();
-                return _ScheduleBanner(schedule: schedule);
-              },
+                // Active Schedule Banner (if exists)
+                FutureBuilder<CareerSchedule?>(
+                  future: ScheduleStorageService.loadSchedule(),
+                  builder: (context, snapshot) {
+                    final schedule = snapshot.data;
+                    if (schedule == null) return const SizedBox.shrink();
+                    return _ScheduleBanner(schedule: schedule);
+                  },
+                ),
+
+                // Editorial Header
+                EditorialHeader(domain: widget.result.primaryDomain),
+                const SizedBox(height: 32),
+
+                // AI Generated Role Paths
+                AiRoleSuggestionsSection(
+                  domain: widget.result.primaryDomain,
+                  profile: widget.result.profile,
+                ),
+
+                const SizedBox(height: 32),
+              ],
             ),
-
-            // Editorial Header
-            EditorialHeader(domain: widget.result.primaryDomain),
-            const SizedBox(height: 32),
-
-            // AI Generated Role Paths
-            AiRoleSuggestionsSection(
-              domain: widget.result.primaryDomain,
-              profile: widget.result.profile,
-            ),
-
-            const SizedBox(height: 32),
-          ],
+          ),
         ),
       ),
     );
@@ -82,13 +87,13 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Text(
+              Text(
                 'CAREER MATCHES',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.4,
-                  color: Color(0xFF1F4E5F),
+                  color: cs.primary,
                 ),
               ),
             ],

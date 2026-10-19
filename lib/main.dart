@@ -4,16 +4,29 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:career_path_finder/ui/welcome_screen.dart';
 import 'package:career_path_finder/ui/home_screen.dart';
 import 'package:career_path_finder/services/auth_service.dart';
+import 'package:career_path_finder/utils/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await dotenv.load(fileName: ".env");
+  configureAppUrlStrategy();
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization notice: $e');
+  }
+
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('Note: .env file not loaded (using environment fallback): $e');
+  }
 
   runApp(
-    // ProviderScope allows us to use Riverpod everywhere in our app.
     const ProviderScope(child: MyApp()),
   );
 }
@@ -26,7 +39,7 @@ class MyApp extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
 
     return MaterialApp(
-      title: 'Career Path Finder',
+      title: 'NextStep AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -49,11 +62,17 @@ class MyApp extends ConsumerWidget {
           onError: Colors.white,
           surface: Color(0xFFF6F7F2),
           onSurface: Color(0xFF182024),
-          surfaceContainerHighest: Color(0xFFE4E8E2),
+          surfaceContainerLowest: Colors.white,
+          surfaceContainerLow: Color(0xFFF0F2EC),
+          surfaceContainer: Color(0xFFE8ECE5),
+          surfaceContainerHigh: Color(0xFFE2E6DF),
+          surfaceContainerHighest: Color(0xFFDCE1DA),
+          onSurfaceVariant: Color(0xFF434E53),
           outline: Color(0xFF748084),
           outlineVariant: Color(0xFFC9D0CB),
         ),
         scaffoldBackgroundColor: const Color(0xFFF6F7F2),
+        cardColor: Colors.white,
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFF6F7F2),
           foregroundColor: Color(0xFF182024),
@@ -101,10 +120,57 @@ class MyApp extends ConsumerWidget {
           onSecondary: Color(0xFF123822),
           secondaryContainer: Color(0xFF1F5C3B),
           onSecondaryContainer: Color(0xFFDDF4E7),
+          tertiary: Color(0xFFFFB85C),
+          onTertiary: Color(0xFF452B00),
+          tertiaryContainer: Color(0xFF633F00),
+          onTertiaryContainer: Color(0xFFFFDDB3),
           surface: Color(0xFF101719),
           onSurface: Color(0xFFE4E8E2),
+          surfaceContainerLowest: Color(0xFF0A0F11),
+          surfaceContainerLow: Color(0xFF141D20),
+          surfaceContainer: Color(0xFF1B2428),
+          surfaceContainerHigh: Color(0xFF222B2F),
+          surfaceContainerHighest: Color(0xFF2B3539),
+          onSurfaceVariant: Color(0xFFBCC6C9),
+          outline: Color(0xFF869296),
+          outlineVariant: Color(0xFF3B464A),
           error: Color(0xFFFFB4AB),
           onError: Color(0xFF690005),
+        ),
+        scaffoldBackgroundColor: const Color(0xFF101719),
+        cardColor: const Color(0xFF1B2428),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF101719),
+          foregroundColor: Color(0xFFE4E8E2),
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            minimumSize: const Size.fromHeight(54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1B2428),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
       themeMode: ThemeMode.system,

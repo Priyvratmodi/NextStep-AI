@@ -37,9 +37,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Stack(
-        children: [
-          CustomScrollView(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Stack(
+            children: [
+              CustomScrollView(
             slivers: [
               _buildAppBar(context),
               SliverPadding(
@@ -126,6 +129,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+      ),
+      ),
     );
   }
 
@@ -163,15 +168,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: Colors.black.withValues(alpha: 0.4),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
-              const Text(
-                'Career Path',
+              Text(
+                'NextStep AI',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF182024),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -500,7 +505,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
         ?action,
@@ -524,55 +529,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               .inDays
               .clamp(0, 9999);
 
-    return Row(
-      children: [
-        Expanded(
-          child: _buildInsightCard(
-            'Tasks Done',
-            '$completed/$total',
-            progress,
-            const Color(0xFF3B2CAF),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildInsightCard(
-            'Active Days',
-            '$activeDays',
-            'logged',
-            const Color(0xFF006C4E),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildInsightCard(
-            'Days Left',
-            '$daysLeft',
-            'target',
-            const Color(0xFF633A00),
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 540;
+        final card1 = _buildInsightCard(
+          context,
+          'Tasks Done',
+          '$completed/$total',
+          progress,
+          const Color(0xFF3B2CAF),
+        );
+        final card2 = _buildInsightCard(
+          context,
+          'Active Days',
+          '$activeDays',
+          'logged',
+          const Color(0xFF006C4E),
+        );
+        final card3 = _buildInsightCard(
+          context,
+          'Days Left',
+          '$daysLeft',
+          'target',
+          const Color(0xFFC77800),
+        );
+
+        if (isNarrow) {
+          return Column(
+            children: [
+              card1,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: card2),
+                  const SizedBox(width: 12),
+                  Expanded(child: card3),
+                ],
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: card1),
+            const SizedBox(width: 12),
+            Expanded(child: card2),
+            const SizedBox(width: 12),
+            Expanded(child: card3),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildInsightCard(
+    BuildContext context,
     String label,
     String value,
     String trend,
     Color borderColor,
   ) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: borderColor, width: 4)),
+        border: Border(
+          left: BorderSide(color: borderColor, width: 4),
+          top: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
+          right: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
+          bottom: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -582,21 +616,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Text(
             label.toUpperCase(),
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.black.withValues(alpha: 0.4),
+              color: cs.onSurface.withValues(alpha: 0.55),
+              letterSpacing: 0.8,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 24,
+                style: TextStyle(
+                  fontSize: 22,
                   fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
                 ),
               ),
               const SizedBox(width: 4),
@@ -665,6 +701,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String subtitle,
     required String time,
   }) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
@@ -683,10 +720,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   height: 1.2,
+                  color: cs.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
@@ -694,7 +732,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.black.withValues(alpha: 0.4),
+                  color: cs.onSurface.withValues(alpha: 0.55),
                 ),
               ),
             ],
@@ -706,7 +744,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: Colors.black.withValues(alpha: 0.3),
+            color: cs.onSurface.withValues(alpha: 0.45),
           ),
         ),
       ],

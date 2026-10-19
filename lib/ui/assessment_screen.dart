@@ -107,9 +107,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context, cs),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(
+              children: [
+                _buildHeader(context, cs),
 
             // Progress Bar
             Container(
@@ -250,6 +253,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
           ],
         ),
       ),
+      ),
+      ),
     );
   }
 
@@ -262,9 +267,14 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             IconButton(
               icon: Icon(Icons.arrow_back_rounded, color: cs.primary),
               onPressed: _prevPage,
+              tooltip: 'Previous question',
             )
           else
-            const SizedBox(width: 48),
+            IconButton(
+              icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant),
+              onPressed: () => Navigator.maybePop(context),
+              tooltip: 'Exit assessment',
+            ),
           const Spacer(),
           Text(
               'ASSESSMENT',
@@ -341,7 +351,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                       vertical: 20,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? cs.primary : Colors.white,
+                      color: isSelected ? cs.primary : cs.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? cs.primary : cs.outlineVariant,

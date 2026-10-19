@@ -41,11 +41,15 @@ class AiService {
   static const _groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   static String _getApiKey() {
-    final apiKey = dotenv.env['GROQ_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('GROQ_API_KEY is not set in .env');
+    const fromEnv = String.fromEnvironment('GROQ_API_KEY');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    if (dotenv.isInitialized) {
+      final apiKey = dotenv.env['GROQ_API_KEY'];
+      if (apiKey != null && apiKey.isNotEmpty) {
+        return apiKey;
+      }
     }
-    return apiKey;
+    throw Exception('GROQ_API_KEY is not configured.');
   }
 
   static List<AiRoleSuggestion> _fallbackRoles(

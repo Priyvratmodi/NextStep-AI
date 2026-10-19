@@ -209,10 +209,13 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         .toList();
 
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-        children: [
-          _buildTopBar(cs),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            children: [
+              _buildTopBar(cs),
           const SizedBox(height: 24),
 
           if (offTrackDays > 0) ...[
@@ -341,6 +344,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
           ],
           const SizedBox(height: 32),
         ],
+      ),
+      ),
       ),
     );
   }
@@ -601,7 +606,9 @@ class _PremiumTaskCard extends StatelessWidget {
                   Row(
                     children: [
                       _Badge(
-                        text: 'Frontend',
+                        text: task.title.contains(' ')
+                            ? task.title.split(' ').first
+                            : 'Topic',
                         color: cs.surfaceContainerHighest,
                       ),
                       const SizedBox(width: 8),
