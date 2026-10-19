@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "607535217629",
+    "project_id": "my-guider-51ede",
+    "storage_bucket": "my-guider-51ede.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607535217629:android:cfaeaa48a1874f05f95434",
+        "android_client_info": {
+          "package_name": "com.priyvratmodi.career_path_finder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "607535217629-sbcdtje9h1t9t56t5aolol70897tqm4p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsWAynyQAhCIJDvmH4XdnJ7jBieHg6e4I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "607535217629-sbcdtje9h1t9t56t5aolol70897tqm4p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "607535217629-arbcviiqfctre9i3jgh3hfgpvu3kfei6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.priyvratmodi.careerPathFinder"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
