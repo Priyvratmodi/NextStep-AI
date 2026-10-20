@@ -69,12 +69,16 @@ jobs:
           name: flutter-web-build
           path: build/web
           retention-days: 7
-
   deploy_vercel:
     name: Deploy to Vercel
     needs: verify_and_build
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -86,21 +90,23 @@ jobs:
           path: build/web
 
       - name: Check Vercel Credentials
-        id: check_credentials
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "::warning ::VERCEL_TOKEN secret is not configured in GitHub repository secrets. Deployment step will be skipped."
-            echo "configured=false" >> $GITHUB_OUTPUT
-          else
-            echo "configured=true" >> $GITHUB_OUTPUT
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN is missing."
+            exit 1
+          fi
+          if [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::error::Vercel organization or project ID is missing."
+            exit 1
           fi
 
-      - name: Deploy Production Build to Vercel
-        if: steps.check_credentials.outputs.configured == 'true'
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: build/web
+      - name: Install Latest Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy Flutter Web Build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel deploy build/web --prod --yes --token="$VERCEL_TOKEN"
